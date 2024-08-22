@@ -24,11 +24,39 @@ def buscar_personajes():
     except requests.exceptions.RequestException as e:
         logger.error(f' Ha ocurrido un error al realizar la consula: {e}')
         raise 
+    
+# Buscar un personaje por nombre en especifico
+def buscar_personaje_nombre(nombre):
+    # Preparar la ruta completa con el nombre a buscar
+    url = API_URL + f'/character/?name={nombre}'
+    
+    #Realizar consulta
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        logger.error(f'Error al realizar la consulta: {e}')
+        raise
+    
+# Buscar un personaje por id en especifico
+def buscar_personaje_id(id):
+    # Preparar la ruta completa con el id a buscar
+    url = API_URL + f'/character/{id}'
+    
+    #Realizar consulta
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        logger.error(f'Error al realizar la consulta: {e}')
+        raise
 
 # Procesar personajes:
 def procesar_personajes(datos):
-    
-    datos_obtenidos = datos.get('results')
+    #Preparar los datos obtenidos, así como un objeto único, en un array iterable
+    datos_obtenidos = datos.get('results', [datos])
     # Extrae los datos más relevantes de los personajes
     try: 
         # Procesa los datos de los personajes, si no hay información disponible
@@ -61,8 +89,22 @@ def procesar_personajes(datos):
 def lambda_handler(event, context):
     # Función principal 
     try:
-        # Obtener datos de la Api a través del método
-        datos = buscar_personajes()
+        
+        #Obtener los parámetros de la solicitud entrante
+        parametros_ruta = event.get('pathParameters', {})
+        parametros_query = event.get('queryStringParameters', {})
+        print(parametros_query, 23)
+
+         # Determinar qué búsqueda realizar
+        if 'name' in parametros_query:
+            nombre = parametros_query['name']
+            datos = buscar_personaje_nombre(nombre)
+        elif 'id' in parametros_query:
+            id = parametros_query['id']
+            datos = buscar_personaje_id(id)
+        else:
+            # Obtener datos de la Api a través del método
+            datos = buscar_personajes()
         
         #Procesar los datos obtenidos
         personajes = procesar_personajes(datos)
@@ -82,9 +124,13 @@ def lambda_handler(event, context):
             'statusCode': 500,
             'body': json.dumps({
                 'mensaje': 'Error al obtener los datos',
-                'error': 'Internal Server Error'
+                'error': 'Internal Server Error',
+                'query': parametros_query,
+                'ruta': parametros_ruta
             }),
             'headers': {
-                'Content-Type': 'application/json'
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": 'GET, POST, PUT, DELETE, OPTIONS',
+            'Content-Type': 'application/json'
             }
         }
