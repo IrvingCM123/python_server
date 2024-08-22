@@ -1,12 +1,11 @@
 import json
-import request 
+import requests
 import logging
 import os
-
+ 
 # Configurar logger
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-
 
 # Configurar el URL 
 API_URL = os.getenv('API_URL')
@@ -18,17 +17,18 @@ def buscar_personajes():
     
     # Realizar consulta
     try:
-        response = request.get(url)
+        response = requests.get(url)
         response.raise_for_status()
         #Retornar respuesta
         return response.json()
-    except request.exceptions.RequestException as e:
+    except requests.exceptions.RequestException as e:
         logger.error(f' Ha ocurrido un error al realizar la consula: {e}')
         raise 
 
-
 # Procesar personajes:
 def procesar_personajes(datos):
+    
+    datos_obtenidos = datos.get('results')
     # Extrae los datos más relevantes de los personajes
     try: 
         # Procesa los datos de los personajes, si no hay información disponible
@@ -50,13 +50,13 @@ def procesar_personajes(datos):
             'image': personaje.get('image', 'Unknown image'),
             'url': personaje.get('url', 'Unknown url'),
             'created': personaje.get('created', 'Unknown created')
-        } for personaje in datos.get('results', [])]
+        } for personaje in datos_obtenidos]
         # Retornar información
         return personajes
     except KeyError as e:
         logger.error(f"Error al procesar los datos: {e}")
+        print(logger.error(f"Error al procesar los datos: {e}"))
         raise
-
 
 def lambda_handler(event, context):
     # Función principal 
@@ -70,10 +70,8 @@ def lambda_handler(event, context):
         # Retornar los datos 
         return {
             'statusCode': 200,
-            'body': json.dumbs({
-                'mensaje': 'Los personajes han cargado correctamente',
-                'personajes': personajes
-            }),
+            'body': personajes,
+            'mensaje': 'Se ha obtenido correctamente la información',
             'headers': {
                 'Content-Type': 'application/json'
             }
@@ -83,7 +81,7 @@ def lambda_handler(event, context):
         return {
             'statusCode': 500,
             'body': json.dumps({
-                'mensaje': f'Error al obtener los datos {e}',
+                'mensaje': 'Error al obtener los datos',
                 'error': 'Internal Server Error'
             }),
             'headers': {
