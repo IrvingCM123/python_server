@@ -25,3 +25,34 @@ def buscar_personajes():
     except request.exceptions.RequestException as e:
         logger.error(f' Ha ocurrido un error al realizar la consula: {e}')
         raise 
+
+
+# Procesar personajes:
+def procesar_personajes(datos):
+    # Extrae los datos más relevantes de los personajes
+    try: 
+        # Procesa los datos de los personajes, si no hay información disponible
+        # retorna un valor "desconocido"
+        personajes = [{
+            'name': personaje.get('name', 'Unknown name'),
+            'status': personaje.get('status', 'Unknown status'),
+            'species': personaje.get('species', 'Unknown specie'),
+            'type': personaje.get('type', 'Unknown type'),
+            'gender': personaje.get('gender', 'Unknown gender'),
+            'origin': {
+                'name': personaje.get('origin', {}).get('name', 'Unknown Origin name'),
+                'url': personaje.get('origin', {}).get('url', 'Unknown URL')
+            },
+            'location': {
+                'name': personaje.get('location', {}).get('name', 'Unknown location name'),
+                'url': personaje.get('location', {}).get('url', 'Unknown URL')
+            },
+            'image': personaje.get('image', 'Unknown image'),
+            'url': personaje.get('url', 'Unknown url'),
+            'created': personaje.get('created', 'Unknown created')
+        } for personaje in datos.get('results', [])]
+        # Retornar información
+        return personajes
+    except KeyError as e:
+        logger.error(f"Error al procesar los datos: {e}")
+        raise
