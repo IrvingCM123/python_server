@@ -56,3 +56,37 @@ def procesar_personajes(datos):
     except KeyError as e:
         logger.error(f"Error al procesar los datos: {e}")
         raise
+
+
+def lambda_handler(event, context):
+    # Función principal 
+    try:
+        # Obtener datos de la Api a través del método
+        datos = buscar_personajes()
+        
+        #Procesar los datos obtenidos
+        personajes = procesar_personajes(datos)
+        
+        # Retornar los datos 
+        return {
+            'statusCode': 200,
+            'body': json.dumbs({
+                'mensaje': 'Los personajes han cargado correctamente',
+                'personajes': personajes
+            }),
+            'headers': {
+                'Content-Type': 'application/json'
+            }
+        }
+    except Exception as e:
+        #Procesar error general 
+        return {
+            'statusCode': 500,
+            'body': json.dumps({
+                'mensaje': f'Error al obtener los datos {e}',
+                'error': 'Internal Server Error'
+            }),
+            'headers': {
+                'Content-Type': 'application/json'
+            }
+        }
