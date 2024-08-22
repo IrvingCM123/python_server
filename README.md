@@ -1,3 +1,5 @@
+Enlace al front end para prueba del proyecto con S3 en AWS: http://rickmortyangular.s3-website.us-east-2.amazonaws.com/
+
 # Descripción del Proyecto
 
 Este proyecto es una función Lambda en Python 3.10 con una arquitectura x86_64, que interactúa con una API externa para obtener y procesar información sobre personajes. La función permite buscar personajes por nombre o ID, así como realizar una consulta general para obtener todos los personajes. Utiliza la biblioteca `requests` para las solicitudes HTTP y maneja errores y registros mediante el módulo `logging`.
@@ -20,11 +22,11 @@ El código incluye manejo de excepciones para errores durante las solicitudes HT
 
 ## Configuración de la Capa para la Biblioteca `requests`
 
-Se adjunta la carpeta.zip necesaria para utilizar la biblioteca `requests` en un entorno AWS Lambda, por medio de la creación de una capa, esto garantizará que la función Lambda pueda realizar solicitudes HTTP correctamente.
+Se adjunta la carpeta `.zip` necesaria para utilizar la biblioteca `requests` en un entorno AWS Lambda, mediante la creación de una capa. Esto garantizará que la función Lambda pueda realizar solicitudes HTTP correctamente.
 
 ## Variables de Entorno
 
-- **API_URL**: El valor de esta variable fue colocada en las variables de entorno de AWS Lambda. Esta URL corresponde a la API externa desde donde se obtendrán los personajes de Rick and Morty
+- **API_URL**: Debe ser configurada en las variables de entorno de AWS Lambda. Esta URL corresponde a la API externa desde donde se obtendrán los personajes de Rick and Morty.
 
 ## Registro de Logs
 
@@ -34,3 +36,16 @@ El código utiliza el módulo `logging` de Python para registrar eventos importa
 
 - **Código 200**: Si la solicitud y el procesamiento de datos son exitosos.
 - **Código 500**: En caso de errores, se proporciona un mensaje de error y detalles de la consulta.
+
+## Sobre el Despliegue de API Proxy
+
+Para crear recursos y gestionar las peticiones, se modificó la solicitud de integración para funcionar con una función Lambda y se enlazó la función Lambda con el recurso. Además, se editaron las solicitudes de integración agregando parámetros de cadenas de consulta de URL con el nombre `name` e `id` como `method.request.querystring.id` y `method.request.querystring.name`. También se creó una plantilla de asignación `application/json` con la siguiente estructura:
+
+```json
+{
+  "queryStringParameters": {
+    #foreach($param in $input.params().querystring.keySet())
+      "$param": "$input.params().querystring.get($param)"
+    #end
+  }
+}
