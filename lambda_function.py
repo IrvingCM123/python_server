@@ -15,15 +15,40 @@ def buscar_personajes():
     # Agregar sufijo a la url almacenada
     url = API_URL + '/character'
     
-    # Realizar consulta
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
-        #Retornar respuesta
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        logger.error(f' Ha ocurrido un error al realizar la consula: {e}')
-        raise 
+    #Lista para almacenar personajes
+    todos_los_personajes = []
+    contador = 0
+    while url:
+        try:
+            # Realizar la consulta a la API
+            response = requests.get(url)
+            response.raise_for_status()
+
+            # Convertir la respuesta en JSON
+            datos = response.json()
+
+            # Agregar los personajes de la página actual a la lista
+            todos_los_personajes.extend(datos['results'])
+
+            # Actualizar la URL con la URL de la siguiente página (si existe)
+            # Actualizar la URL con la URL de la siguiente página (si existe)
+            next_url = datos['info'].get('next')
+            contador = contador + 1
+            print(contador)
+            print(next_url)
+            if next_url is None:
+                print('No more pages.')
+                break
+            else:
+                url = next_url
+
+        except requests.exceptions.RequestException as e:
+            logger.error(f'Ha ocurrido un error al realizar la consulta: {e}')
+            raise
+        
+    print(f'Total de personajes obtenidos: {len(todos_los_personajes)}')
+    # Retornar todos los personajes obtenidos
+    return todos_los_personajes
     
 # Buscar un personaje por nombre en especifico
 def buscar_personaje_nombre(nombre):
@@ -56,7 +81,10 @@ def buscar_personaje_id(id):
 # Procesar personajes:
 def procesar_personajes(datos):
     #Preparar los datos obtenidos, así como un objeto único, en un array iterable
-    datos_obtenidos = datos.get('results', [datos])
+    try:
+        datos_obtenidos = datos.get('results', [datos])
+    except:
+        datos_obtenidos = datos
     # Extrae los datos más relevantes de los personajes
     try: 
         # Procesa los datos de los personajes, si no hay información disponible
