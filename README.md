@@ -20,11 +20,11 @@ El código incluye manejo de excepciones para errores durante las solicitudes HT
 
 ## Configuración de la Capa para la Biblioteca `requests`
 
-Para utilizar la biblioteca `requests` en un entorno AWS Lambda, asegúrate de crear una capa (`Layer`) que incluya esta biblioteca. Esto garantizará que la función Lambda pueda realizar solicitudes HTTP correctamente.
+Se adjunta la carpeta.zip necesaria para utilizar la biblioteca `requests` en un entorno AWS Lambda, por medio de la creación de una capa, esto garantizará que la función Lambda pueda realizar solicitudes HTTP correctamente.
 
 ## Variables de Entorno
 
-- **API_URL**: Debe ser configurada en las variables de entorno de AWS Lambda. Esta URL corresponde a la API externa desde donde se obtendrán los personajes.
+- **API_URL**: El valor de esta variable fue colocada en las variables de entorno de AWS Lambda. Esta URL corresponde a la API externa desde donde se obtendrán los personajes de Rick and Morty
 
 ## Registro de Logs
 
